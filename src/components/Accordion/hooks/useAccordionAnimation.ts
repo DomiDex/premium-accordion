@@ -1,4 +1,4 @@
-import { useRef, RefObject, useLayoutEffect } from 'react'
+import { useRef, RefObject, useLayoutEffect, useEffect } from 'react'
 import { timeline, set, to } from '../utils/gsap'
 import { setMultipleWillChange, clearMultipleWillChange } from '../utils/dom'
 import { ANIMATION_CONFIG } from '../utils/animation'
@@ -258,6 +258,16 @@ export const useAccordionAnimation = (
       }
     }
   }, [isOpen, duration, ease, stagger, enableMicroInteractions, contentRef, iconRef, buttonRef])
+
+  // Cleanup breathing animation on unmount or when disabled
+  useEffect(() => {
+    return () => {
+      if (breathingAnimation.current) {
+        breathingAnimation.current.kill()
+        breathingAnimation.current = null
+      }
+    }
+  }, [enableMicroInteractions])
 
   // Hover animations for micro-interactions
   useLayoutEffect(() => {

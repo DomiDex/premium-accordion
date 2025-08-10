@@ -6,7 +6,6 @@ import { useAccordionAnimation } from './hooks/useAccordionAnimation'
 import { useAccordionInteractions } from './hooks/useAccordionInteractions'
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation'
 import { useAriaLive } from './hooks/useAriaLive'
-// Removed useResizeObserver - not needed, GSAP handles height animations
 import { AccordionButton } from './AccordionButton'
 import { AccordionContent } from './AccordionContent'
 import { getItemWrapperClasses } from './utils/styles'

@@ -21,7 +21,6 @@ export const AccordionButton = forwardRef<HTMLButtonElement, AccordionButtonProp
         onClick={onClick}
         disabled={item.disabled}
         type="button"
-        role="button"
         aria-expanded={isOpen}
         aria-controls={getElementId('panel', item.id)}
         aria-describedby={item.subtitle ? getElementId('subtitle', item.id) : undefined}

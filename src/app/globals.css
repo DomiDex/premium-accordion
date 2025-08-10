@@ -1,40 +1,15 @@
 @import "tailwindcss";
 
-:root {
-  /* Dark Theme Colors */
-  --bg-primary: #000000;
-  --text-primary: #FFFFFF;
-  --accent-primary: #3B82F6;
-  
-  /* Accordion Colors */
-  --accordion-bg: rgba(17, 17, 17, 0.5);
-  --accordion-border: rgba(255, 255, 255, 0.08);
-  --accordion-hover: rgba(26, 26, 26, 0.6);
-  --accordion-active: rgba(34, 34, 34, 0.5);
-  --accordion-text: rgba(156, 163, 175, 1);
-  --accordion-icon-open: rgba(59, 130, 246, 1);
-  --accordion-icon-closed: rgba(156, 163, 175, 1);
-  
-  /* Accordion Spacing */
-  --accordion-padding-x: 2rem;
-  --accordion-padding-y: 1.5rem;
-  --accordion-content-padding: 1rem 2rem 1.5rem;
-  
-  /* Accordion Animation */
-  --accordion-duration: 300ms;
-  --accordion-ease: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 @theme inline {
-  --color-background: var(--bg-primary);
-  --color-foreground: var(--text-primary);
+  --color-background: #000000;
+  --color-foreground: #FFFFFF;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: #000000;
+  color: #FFFFFF;
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   min-height: 100vh;
 }

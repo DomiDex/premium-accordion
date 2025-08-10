@@ -12,13 +12,6 @@ export const ANIMATION_CONFIG = {
   OVERLAP_TIMING: 0.4,
 } as const
 
-export type AnimationEasing = 
-  | 'power2.out' 
-  | 'power2.in' 
-  | 'power2.inOut'
-  | 'elastic.out'
-  | 'back.out'
-
 /**
  * Get normalized animation options from milliseconds to seconds
  */

@@ -146,26 +146,4 @@ export interface UseKeyboardNavigationProps {
   disabled?: boolean
 }
 
-/**
- * Type guards
- */
-export const isAccordionMode = (value: unknown): value is AccordionMode => {
-  return value === ACCORDION_MODES.SINGLE || value === ACCORDION_MODES.MULTIPLE
-}
-
-export const isAnimationEasing = (value: unknown): value is AnimationEasing => {
-  return Object.values(ANIMATION_EASINGS).includes(value as AnimationEasing)
-}
-
-export const isAccordionItemData = (value: unknown): value is AccordionItemData => {
-  if (typeof value !== 'object' || value === null) return false
-  const item = value as Record<string, unknown>
-  return (
-    typeof item.id === 'string' &&
-    typeof item.title === 'string' &&
-    (item.subtitle === undefined || typeof item.subtitle === 'string') &&
-    item.content !== undefined &&
-    (item.disabled === undefined || typeof item.disabled === 'boolean')
-  )
-}
 

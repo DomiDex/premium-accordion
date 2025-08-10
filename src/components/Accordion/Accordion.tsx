@@ -4,50 +4,14 @@ import { forwardRef } from 'react'
 import { AccordionProvider } from './AccordionContext'
 import { AccordionItem } from './AccordionItem'
 import { ACCORDION_STYLES, cn } from './utils/styles'
-import type { AccordionProps, AccordionRef, AccordionItemData } from './types/accordion.types'
-import type { AccordionPropsSimplified, AccordionItemExtended } from './types/accordion.config'
-import { normalizeAccordionItem, mergeConfig, DEFAULT_CONFIG } from './types/accordion.config'
+import type { AccordionProps, AccordionRef } from './types/accordion.types'
 
 // Re-export types for backward compatibility
 export type { AccordionItemData as AccordionItem, AccordionProps, AccordionRef } from './types/accordion.types'
 
-// Support both old and new API
-type CombinedAccordionProps = AccordionProps | AccordionPropsSimplified
-
-function isSimplifiedProps(props: CombinedAccordionProps): props is AccordionPropsSimplified {
-  return 'config' in props || !('animationDuration' in props || 'easingFunction' in props)
-}
-
-function normalizeProps(props: CombinedAccordionProps): AccordionProps {
-  if (isSimplifiedProps(props)) {
-    const config = mergeConfig(DEFAULT_CONFIG, props.config)
-    return {
-      items: props.items.map(item => {
-        const normalized = normalizeAccordionItem(item as AccordionItemExtended)
-        return {
-          id: normalized.id,
-          title: normalized.title,
-          content: normalized.content,
-          subtitle: normalized.metadata?.subtitle,
-          icon: normalized.metadata?.icon,
-          disabled: normalized.metadata?.disabled
-        } as AccordionItemData
-      }),
-      mode: props.mode,
-      defaultOpen: props.defaultOpen,
-      animationDuration: config.animation.duration,
-      easingFunction: config.animation.easing,
-      onToggle: props.onToggle,
-      className: props.className
-    }
-  }
-  return props as AccordionProps
-}
-
-export const Accordion = forwardRef<AccordionRef, CombinedAccordionProps>(
+export const Accordion = forwardRef<AccordionRef, AccordionProps>(
   (props, ref) => {
-    const normalizedProps = normalizeProps(props)
-    const { items, mode = 'single', className = '', ...restProps } = normalizedProps
+    const { items, mode = 'single', className = '', ...restProps } = props
     return (
       <AccordionProvider mode={mode} ref={ref} totalItems={items.length} {...restProps}>
         <div

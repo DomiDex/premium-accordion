@@ -1,36 +1,222 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Premium Accordion Component
 
-## Getting Started
+A high-performance, accessible, and beautifully animated accordion component built with React, TypeScript, and GSAP.
 
-First, run the development server:
+## Features
+
+- 🎯 **Accessible**: Full ARIA support and keyboard navigation
+- ⚡ **High Performance**: GPU-accelerated animations with GSAP
+- 🎨 **Beautiful Animations**: Smooth transitions with customizable easing
+- 📱 **Responsive**: Mobile-optimized with touch support
+- ⌨️ **Keyboard Navigation**: Arrow keys, Home/End, and Tab support
+- 🔧 **Flexible API**: Single or multiple mode operation
+- 🎭 **Micro-interactions**: Hover effects and breathing animations
+- 🚀 **Production Ready**: TypeScript, tree-shakeable, and optimized
+
+## Quick Start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the accordion in action.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Basic Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```tsx
+import { Accordion } from '@/components/Accordion'
 
-## Learn More
+const items = [
+  {
+    id: '1',
+    title: 'Section 1',
+    subtitle: 'Optional subtitle',
+    content: <div>Your content here</div>
+  },
+  {
+    id: '2',
+    title: 'Section 2',
+    content: 'Simple text content'
+  }
+]
 
-To learn more about Next.js, take a look at the following resources:
+function App() {
+  return (
+    <Accordion 
+      items={items}
+      mode="single"
+      defaultOpen={['1']}
+    />
+  )
+}
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Reference
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Accordion Props
 
-## Deploy on Vercel
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `items` | `AccordionItem[]` | Required | Array of accordion items |
+| `mode` | `'single' \| 'multiple'` | `'single'` | Allow single or multiple panels open |
+| `defaultOpen` | `string[]` | `[]` | IDs of initially open items |
+| `animationDuration` | `number` | `0.6` | Animation duration in seconds |
+| `easingFunction` | `string` | `'power2.inOut'` | GSAP easing function |
+| `onToggle` | `(id: string, isOpen: boolean) => void` | - | Callback when item toggles |
+| `className` | `string` | `''` | Additional CSS classes |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### AccordionItem Interface
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```typescript
+interface AccordionItem {
+  id: string
+  title: string
+  subtitle?: string
+  content: React.ReactNode
+  icon?: React.ReactNode
+  disabled?: boolean
+}
+```
+
+### Ref Methods
+
+```typescript
+interface AccordionRef {
+  openAll: () => void
+  closeAll: () => void
+  toggle: (id: string) => void
+  openItem: (id: string) => void
+  closeItem: (id: string) => void
+  isOpen: (id: string) => boolean
+  getOpenItems: () => string[]
+}
+```
+
+## Advanced Usage
+
+### With Ref Control
+
+```tsx
+import { useRef } from 'react'
+import { Accordion, AccordionRef } from '@/components/Accordion'
+
+function App() {
+  const accordionRef = useRef<AccordionRef>(null)
+
+  return (
+    <>
+      <button onClick={() => accordionRef.current?.openAll()}>
+        Open All
+      </button>
+      <Accordion ref={accordionRef} items={items} />
+    </>
+  )
+}
+```
+
+### Custom Animation
+
+```tsx
+<Accordion
+  items={items}
+  animationDuration={0.8}
+  easingFunction="elastic.out(1, 0.3)"
+/>
+```
+
+### Multiple Mode
+
+```tsx
+<Accordion
+  items={items}
+  mode="multiple"
+  defaultOpen={['1', '2']}
+/>
+```
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `ArrowUp` | Focus previous item |
+| `ArrowDown` | Focus next item |
+| `Home` | Focus first item |
+| `End` | Focus last item |
+| `Enter` / `Space` | Toggle focused item |
+| `Tab` | Navigate through items |
+
+## Accessibility
+
+The component follows WAI-ARIA authoring practices:
+
+- Proper ARIA attributes (`aria-expanded`, `aria-controls`, `aria-describedby`)
+- Screen reader announcements for state changes
+- Keyboard navigation support
+- Focus management
+- High contrast mode support
+
+## Performance
+
+- GPU-accelerated animations with `transform3d`
+- RAF throttling for smooth 60fps animations
+- Efficient re-render prevention with `React.memo`
+- Will-change optimization for animations
+- Tree-shakeable and optimized bundle size
+
+## Browser Support
+
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Run linting
+npm run lint
+```
+
+## Architecture
+
+```
+src/components/Accordion/
+├── Accordion.tsx           # Main component
+├── AccordionItem.tsx       # Item component
+├── AccordionButton.tsx     # Button component
+├── AccordionContent.tsx    # Content component
+├── AccordionContext.tsx    # Context provider
+├── hooks/                  # Custom hooks
+│   ├── useAccordion.ts
+│   ├── useAccordionAnimation.ts
+│   ├── useAccordionInteractions.ts
+│   ├── useKeyboardNavigation.ts
+│   └── useAriaLive.ts
+├── types/                  # TypeScript types
+│   └── accordion.types.ts
+└── utils/                  # Utilities
+    ├── animation.ts
+    ├── constants.ts
+    ├── dom.ts
+    ├── gsap.ts
+    ├── performance.ts
+    └── styles.ts
+```
+
+## License
+
+MIT
+
+## Author
+
+Made with ❤️ by DomiDex

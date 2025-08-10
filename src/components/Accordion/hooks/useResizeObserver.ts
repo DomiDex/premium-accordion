@@ -7,7 +7,7 @@ interface UseResizeObserverOptions {
 }
 
 export const useResizeObserver = (
-  contentRef: RefObject<HTMLDivElement>,
+  contentRef: RefObject<HTMLDivElement | null>,
   options: UseResizeObserverOptions
 ) => {
   const observerRef = useRef<ResizeObserver | null>(null)

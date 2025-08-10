@@ -2,15 +2,14 @@
 
 import { useRef, useEffect, memo, useCallback } from 'react'
 import { useAccordion } from './AccordionContext'
-import { useTimelineAnimation } from './hooks/useTimelineAnimation'
-import { useMouseGradient } from './hooks/useMouseGradient'
-import { useMicroInteractions } from './hooks/useMicroInteractions'
+import { useAccordionAnimation } from './hooks/useAccordionAnimation'
+import { useAccordionInteractions } from './hooks/useAccordionInteractions'
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation'
 import { useAriaLive } from './hooks/useAriaLive'
 import { useResizeObserver } from './hooks/useResizeObserver'
-import { getAnimationOptions } from './utils/animation'
-import { getElementId } from './utils/dom'
-import { ACCORDION_STYLES, GRADIENT_STYLES } from './utils/styles'
+import { AccordionButton } from './AccordionButton'
+import { AccordionContent } from './AccordionContent'
+import { getItemWrapperClasses } from './utils/styles'
 import type { AccordionItem as AccordionItemType } from './Accordion'
 
 interface AccordionItemProps {
@@ -21,9 +20,14 @@ interface AccordionItemProps {
 
 const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => {
   const { togglePanel, isOpen, animationDuration, easingFunction, totalItems } = useAccordion()
-  const contentRef = useRef<HTMLDivElement>(null)
-  const buttonRef = useRef<HTMLButtonElement>(null)
-  const iconRef = useRef<HTMLDivElement>(null)
+  
+  // Consolidated refs management
+  const refs = useRef({
+    content: null as HTMLDivElement | null,
+    button: null as HTMLButtonElement | null,
+    icon: null as HTMLDivElement | null
+  })
+  
   const open = isOpen(index)
   const { announce } = useAriaLive()
 
@@ -36,11 +40,30 @@ const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => 
     }
   }, [open, item.title, announce])
 
-  // Add mouse gradient effect
-  useMouseGradient(buttonRef)
+  // Create individual refs for hooks that need them
+  const contentRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const iconRef = useRef<HTMLDivElement>(null)
   
-  // Add micro-interactions
-  useMicroInteractions(buttonRef, open)
+  // Use consolidated animation hook
+  useAccordionAnimation(
+    contentRef,
+    iconRef,
+    buttonRef,
+    open,
+    {
+      duration: animationDuration ? animationDuration / 1000 : undefined,
+      ease: easingFunction,
+      stagger: true,
+      enableMicroInteractions: true
+    }
+  )
+
+  // Use consolidated interactions hook
+  useAccordionInteractions(buttonRef, {
+    isOpen: open,
+    disabled: item.disabled
+  })
   
   // Add keyboard navigation
   useKeyboardNavigation({
@@ -51,19 +74,6 @@ const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => 
     isOpen: open,
     disabled: item.disabled
   })
-
-  // Use coordinated timeline animation
-  const animationConfig = getAnimationOptions(animationDuration, easingFunction)
-  useTimelineAnimation(
-    contentRef, 
-    iconRef, 
-    buttonRef,
-    open, 
-    {
-      ...animationConfig,
-      stagger: true
-    }
-  )
   
   // Handle dynamic content resizing
   useResizeObserver(contentRef, {
@@ -81,110 +91,22 @@ const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => 
 
   return (
     <div
-      className={`
-        ${ACCORDION_STYLES.itemWrapper}
-        ${isLast ? 'border-b-0' : ''}
-        data-[state=open]:bg-gradient-to-r
-        data-[state=open]:from-transparent
-        data-[state=open]:to-blue-500/5
-      `}
+      className={getItemWrapperClasses(isLast)}
       data-state={open ? 'open' : 'closed'}
     >
-      <button
+      <AccordionButton
         ref={buttonRef}
+        item={item}
+        index={index}
+        isOpen={open}
         onClick={handleClick}
-        disabled={item.disabled}
-        type="button"
-        role="button"
-        aria-expanded={open}
-        aria-controls={getElementId('panel', item.id)}
-        aria-describedby={item.subtitle ? getElementId('subtitle', item.id) : undefined}
-        id={getElementId('header', item.id)}
-        data-accordion-trigger={index}
-        tabIndex={0}
-        className={`
-          ${ACCORDION_STYLES.button.base}
-          ${GRADIENT_STYLES.beforeGradient}
-          ${GRADIENT_STYLES.afterMouseGradient}
-          ${ACCORDION_STYLES.button.hover}
-          hover:before:opacity-100
-          hover:after:opacity-100
-          ${ACCORDION_STYLES.button.focus}
-          ${open ? `${ACCORDION_STYLES.button.active} before:opacity-50` : ''}
-          ${item.disabled ? ACCORDION_STYLES.button.disabled : 'cursor-pointer'}
-        `}
-      >
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <h3 className={ACCORDION_STYLES.text.title}>
-              {item.title}
-            </h3>
-            {item.subtitle && (
-              <p 
-                id={getElementId('subtitle', item.id)}
-                className={ACCORDION_STYLES.text.subtitle}
-              >
-                {item.subtitle}
-              </p>
-            )}
-          </div>
-          <div
-            ref={iconRef}
-            className={`
-              ${ACCORDION_STYLES.icon.wrapper}
-              ${open ? ACCORDION_STYLES.icon.open : ACCORDION_STYLES.icon.closed}
-              ${ACCORDION_STYLES.icon.hover}
-            `}
-            aria-hidden="true"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              className="transition-colors duration-300"
-            >
-              <path
-                d="M5 7.5L10 12.5L15 7.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="sr-only">
-              {open ? 'Collapse' : 'Expand'} {item.title}
-            </span>
-          </div>
-        </div>
-      </button>
-
-      <div
+        iconRef={iconRef}
+      />
+      <AccordionContent
         ref={contentRef}
-        id={getElementId('panel', item.id)}
-        role="region"
-        aria-labelledby={getElementId('header', item.id)}
-        aria-hidden={!open}
-        className={`
-          ${ACCORDION_STYLES.content.wrapper}
-          before:content-['']
-          before:absolute
-          before:inset-x-8
-          before:top-0
-          before:h-px
-          before:bg-gradient-to-r
-          before:from-transparent
-          before:via-blue-500/20
-          before:to-transparent
-        `}
-        style={{
-          height: 0,
-        }}
-      >
-        <div className={ACCORDION_STYLES.content.inner}>
-          {item.content}
-        </div>
-      </div>
+        item={item}
+        isOpen={open}
+      />
     </div>
   )
 }

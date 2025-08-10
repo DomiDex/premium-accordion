@@ -1,14 +1,16 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, forwardRef, useImperativeHandle, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useCallback, forwardRef, useImperativeHandle, ReactNode } from 'react'
 import type { AccordionRef } from './Accordion'
+import { ACCORDION_MODES, ANIMATION_DEFAULTS } from './utils/constants'
 
 interface AccordionContextValue {
   mode: 'single' | 'multiple'
+  openPanels: number[]
   togglePanel: (index: number) => void
   isOpen: (index: number) => boolean
-  animationDuration?: number
-  easingFunction?: string
+  animationDuration: number
+  easingFunction: string
   totalItems: number
 }
 
@@ -26,9 +28,9 @@ interface AccordionProviderProps {
   children: ReactNode
   mode: 'single' | 'multiple'
   defaultOpen?: number | number[]
+  onToggle?: (index: number, isOpen: boolean) => void
   animationDuration?: number
   easingFunction?: string
-  onToggle?: (index: number, isOpen: boolean) => void
   totalItems: number
 }
 
@@ -38,9 +40,9 @@ export const AccordionProvider = forwardRef<AccordionRef, AccordionProviderProps
       children,
       mode,
       defaultOpen = [],
-      animationDuration = 500,
-      easingFunction = 'power2.out',
       onToggle,
+      animationDuration = ANIMATION_DEFAULTS.DURATION_MS,
+      easingFunction = ANIMATION_DEFAULTS.EASE,
       totalItems,
     },
     ref
@@ -59,7 +61,7 @@ export const AccordionProvider = forwardRef<AccordionRef, AccordionProviderProps
         let newPanels: number[]
         const isCurrentlyOpen = prev.includes(index)
 
-        if (mode === 'single') {
+        if (mode === ACCORDION_MODES.SINGLE) {
           newPanels = isCurrentlyOpen ? [] : [index]
         } else {
           newPanels = isCurrentlyOpen
@@ -80,7 +82,7 @@ export const AccordionProvider = forwardRef<AccordionRef, AccordionProviderProps
 
     const open = useCallback((index: number) => {
       setOpenPanels((prev) => {
-        if (mode === 'single') return [index]
+        if (mode === ACCORDION_MODES.SINGLE) return [index]
         if (!prev.includes(index)) return [...prev, index]
         return prev
       })
@@ -91,10 +93,10 @@ export const AccordionProvider = forwardRef<AccordionRef, AccordionProviderProps
     }, [])
 
     const openAll = useCallback(() => {
-      if (mode === 'multiple') {
-        setOpenPanels(Array.from({ length: 100 }, (_, i) => i))
+      if (mode === ACCORDION_MODES.MULTIPLE) {
+        setOpenPanels(Array.from({ length: totalItems }, (_, i) => i))
       }
-    }, [mode])
+    }, [mode, totalItems])
 
     const closeAll = useCallback(() => {
       setOpenPanels([])
@@ -118,6 +120,7 @@ export const AccordionProvider = forwardRef<AccordionRef, AccordionProviderProps
       <AccordionContext.Provider
         value={{
           mode,
+          openPanels,
           togglePanel,
           isOpen,
           animationDuration,

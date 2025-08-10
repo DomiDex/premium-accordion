@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useCallback } from 'react'
 
 interface UseKeyboardNavigationProps {
-  buttonRef: RefObject<HTMLButtonElement>
+  buttonRef: RefObject<HTMLButtonElement | null>
   index: number
   totalItems: number
   togglePanel: (index: number) => void

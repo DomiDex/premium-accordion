@@ -1,27 +1,32 @@
 import { useRef, RefObject, useLayoutEffect } from 'react'
 import gsap from 'gsap'
+import { setMultipleWillChange, clearMultipleWillChange } from '../utils/dom'
+import { ANIMATION_CONFIG } from '../utils/animation'
 
-interface UseTimelineAnimationOptions {
+interface UseAccordionAnimationOptions {
   duration?: number
   ease?: string
   stagger?: boolean
+  enableMicroInteractions?: boolean
 }
 
-export const useTimelineAnimation = (
-  contentRef: RefObject<HTMLDivElement>,
-  iconRef: RefObject<HTMLDivElement>,
-  buttonRef: RefObject<HTMLButtonElement>,
+export const useAccordionAnimation = (
+  contentRef: RefObject<HTMLDivElement | null>,
+  iconRef: RefObject<HTMLDivElement | null>,
+  buttonRef: RefObject<HTMLButtonElement | null>,
   isOpen: boolean,
-  options: UseTimelineAnimationOptions = {}
+  options: UseAccordionAnimationOptions = {}
 ) => {
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
   const previousOpenState = useRef<boolean | null>(null)
   const isFirstRender = useRef(true)
+  const breathingAnimation = useRef<gsap.core.Tween | null>(null)
 
   const {
-    duration = 0.5,
-    ease = 'power2.out',
+    duration = ANIMATION_CONFIG.DEFAULT_DURATION,
+    ease = ANIMATION_CONFIG.DEFAULT_EASE,
     stagger = true,
+    enableMicroInteractions = true
   } = options
 
   useLayoutEffect(() => {
@@ -56,9 +61,13 @@ export const useTimelineAnimation = (
     if (previousOpenState.current === isOpen) return
     previousOpenState.current = isOpen
 
-    // Kill existing timeline
+    // Kill existing animations
     if (timelineRef.current) {
       timelineRef.current.kill()
+    }
+    if (breathingAnimation.current) {
+      breathingAnimation.current.kill()
+      breathingAnimation.current = null
     }
 
     const content = contentRef.current
@@ -71,22 +80,29 @@ export const useTimelineAnimation = (
       const tl = gsap.timeline({
         defaults: { ease },
         onStart: () => {
-          gsap.set(content, { 
-            overflow: 'hidden',
-            willChange: 'height'
-          })
-          if (inner) {
-            gsap.set(inner, { willChange: 'opacity, transform' })
-          }
+          gsap.set(content, { overflow: 'hidden' })
+          setMultipleWillChange(
+            { content, inner },
+            { content: 'height', inner: 'opacity, transform' }
+          )
         },
         onComplete: () => {
           gsap.set(content, { 
             height: 'auto', 
             overflow: 'visible',
-            clearProps: 'transform, will-change'
+            clearProps: 'transform'
           })
-          if (inner) {
-            gsap.set(inner, { clearProps: 'will-change' })
+          clearMultipleWillChange([content, inner])
+
+          // Start breathing animation when open
+          if (enableMicroInteractions && button) {
+            breathingAnimation.current = gsap.to(button, {
+              scale: 1.002,
+              duration: 2,
+              ease: 'sine.inOut',
+              repeat: -1,
+              yoyo: true
+            })
           }
         }
       })
@@ -97,7 +113,7 @@ export const useTimelineAnimation = (
       gsap.set(content, { height: 0 })
 
       // Add subtle bounce effect on button
-      if (button) {
+      if (enableMicroInteractions && button) {
         tl.to(button, {
           scale: 0.98,
           duration: 0.08,
@@ -120,9 +136,9 @@ export const useTimelineAnimation = (
       // Icon rotation with spring effect
       tl.to(icon, {
         rotation: 180,
-        duration: duration * 0.6,
+        duration: duration * ANIMATION_CONFIG.CONTENT_FADE_RATIO,
         ease: 'back.out(1.7)'
-      }, '-=0.4')
+      }, `-=${ANIMATION_CONFIG.OVERLAP_TIMING}`)
 
       // Content fade in with upward movement
       if (inner) {
@@ -130,7 +146,7 @@ export const useTimelineAnimation = (
         tl.to(inner, {
           opacity: 1,
           y: 0,
-          duration: duration * 0.6,
+          duration: duration * ANIMATION_CONFIG.CONTENT_FADE_RATIO,
           ease: 'power2.out'
         }, '-=0.35')
 
@@ -142,8 +158,8 @@ export const useTimelineAnimation = (
             tl.to(elements, {
               opacity: 1,
               y: 0,
-              duration: 0.3,
-              stagger: 0.05,
+              duration: ANIMATION_CONFIG.ICON_DURATION,
+              stagger: ANIMATION_CONFIG.STAGGER_DELAY,
               ease: 'power2.out'
             }, '-=0.2')
           }
@@ -151,7 +167,7 @@ export const useTimelineAnimation = (
       }
 
       // Add subtle glow pulse on open
-      if (button) {
+      if (enableMicroInteractions && button) {
         tl.to(button, {
           boxShadow: '0 0 20px rgba(59, 130, 246, 0.2)',
           duration: 0.3,
@@ -170,19 +186,23 @@ export const useTimelineAnimation = (
       const tl = gsap.timeline({
         defaults: { ease: 'power2.in' },
         onStart: () => {
-          gsap.set(content, { 
-            overflow: 'hidden',
-            willChange: 'height'
-          })
-          if (inner) {
-            gsap.set(inner, { willChange: 'opacity, transform' })
+          gsap.set(content, { overflow: 'hidden' })
+          setMultipleWillChange(
+            { content, inner },
+            { content: 'height', inner: 'opacity, transform' }
+          )
+          
+          // Stop breathing animation
+          if (breathingAnimation.current) {
+            breathingAnimation.current.kill()
+            breathingAnimation.current = null
+            if (button) {
+              gsap.set(button, { scale: 1 })
+            }
           }
         },
         onComplete: () => {
-          gsap.set(content, { clearProps: 'will-change' })
-          if (inner) {
-            gsap.set(inner, { clearProps: 'will-change' })
-          }
+          clearMultipleWillChange([content, inner])
         }
       })
 
@@ -194,7 +214,7 @@ export const useTimelineAnimation = (
             opacity: 0,
             y: -5,
             duration: 0.2,
-            stagger: 0.02,
+            stagger: ANIMATION_CONFIG.STAGGER_DELAY * 0.4,
             ease: 'power2.in'
           })
         }
@@ -225,7 +245,7 @@ export const useTimelineAnimation = (
       }, '-=0.4')
 
       // Subtle scale on close
-      if (button) {
+      if (enableMicroInteractions && button) {
         tl.to(button, {
           scale: 0.995,
           duration: 0.1,
@@ -245,10 +265,49 @@ export const useTimelineAnimation = (
       if (timelineRef.current) {
         timelineRef.current.kill()
       }
+      if (breathingAnimation.current) {
+        breathingAnimation.current.kill()
+      }
     }
-  }, [isOpen, duration, ease, stagger, contentRef, iconRef, buttonRef])
+  }, [isOpen, duration, ease, stagger, enableMicroInteractions, contentRef, iconRef, buttonRef])
+
+  // Hover animations for micro-interactions
+  useLayoutEffect(() => {
+    if (!enableMicroInteractions || !buttonRef.current) return
+
+    const button = buttonRef.current
+    
+    const handleMouseEnter = () => {
+      if (!breathingAnimation.current) {
+        gsap.to(button, {
+          scale: 1.005,
+          duration: 0.2,
+          ease: ANIMATION_CONFIG.DEFAULT_EASE
+        })
+      }
+    }
+
+    const handleMouseLeave = () => {
+      if (!breathingAnimation.current) {
+        gsap.to(button, {
+          scale: 1,
+          duration: 0.2,
+          ease: ANIMATION_CONFIG.DEFAULT_EASE
+        })
+      }
+    }
+
+    button.addEventListener('mouseenter', handleMouseEnter)
+    button.addEventListener('mouseleave', handleMouseLeave)
+
+    return () => {
+      button.removeEventListener('mouseenter', handleMouseEnter)
+      button.removeEventListener('mouseleave', handleMouseLeave)
+    }
+  }, [enableMicroInteractions, buttonRef])
 
   return {
-    timeline: timelineRef.current
+    timeline: timelineRef.current,
+    isAnimating: timelineRef.current?.isActive() || false
   }
 }

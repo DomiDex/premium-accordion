@@ -19,8 +19,6 @@ export interface AccordionProps {
   defaultOpen?: number | number[]
   animationDuration?: number
   easingFunction?: string
-  scrollBehavior?: boolean
-  scrollOffset?: number
   className?: string
   onToggle?: (index: number, isOpen: boolean) => void
 }

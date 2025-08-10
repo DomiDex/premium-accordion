@@ -4,15 +4,11 @@ import { createContext, useContext, useState, useCallback, forwardRef, useImpera
 import type { AccordionRef } from './Accordion'
 
 interface AccordionContextValue {
-  openPanels: number[]
   mode: 'single' | 'multiple'
   togglePanel: (index: number) => void
   isOpen: (index: number) => boolean
   animationDuration?: number
   easingFunction?: string
-  scrollBehavior?: boolean
-  scrollOffset?: number
-  onToggle?: (index: number, isOpen: boolean) => void
   totalItems: number
 }
 
@@ -32,8 +28,6 @@ interface AccordionProviderProps {
   defaultOpen?: number | number[]
   animationDuration?: number
   easingFunction?: string
-  scrollBehavior?: boolean
-  scrollOffset?: number
   onToggle?: (index: number, isOpen: boolean) => void
   totalItems: number
 }
@@ -46,8 +40,6 @@ export const AccordionProvider = forwardRef<AccordionRef, AccordionProviderProps
       defaultOpen = [],
       animationDuration = 500,
       easingFunction = 'power2.out',
-      scrollBehavior = true,
-      scrollOffset = 100,
       onToggle,
       totalItems,
     },
@@ -125,15 +117,11 @@ export const AccordionProvider = forwardRef<AccordionRef, AccordionProviderProps
     return (
       <AccordionContext.Provider
         value={{
-          openPanels,
           mode,
           togglePanel,
           isOpen,
           animationDuration,
           easingFunction,
-          scrollBehavior,
-          scrollOffset,
-          onToggle,
           totalItems,
         }}
       >

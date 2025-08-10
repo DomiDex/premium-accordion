@@ -8,6 +8,9 @@ import { useMicroInteractions } from './hooks/useMicroInteractions'
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation'
 import { useAriaLive } from './hooks/useAriaLive'
 import { useResizeObserver } from './hooks/useResizeObserver'
+import { getAnimationOptions } from './utils/animation'
+import { getElementId } from './utils/dom'
+import { ACCORDION_STYLES, GRADIENT_STYLES } from './utils/styles'
 import type { AccordionItem as AccordionItemType } from './Accordion'
 
 interface AccordionItemProps {
@@ -50,14 +53,14 @@ const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => 
   })
 
   // Use coordinated timeline animation
+  const animationConfig = getAnimationOptions(animationDuration, easingFunction)
   useTimelineAnimation(
     contentRef, 
     iconRef, 
     buttonRef,
     open, 
     {
-      duration: animationDuration ? animationDuration / 1000 : 0.5,
-      ease: easingFunction || 'power2.out',
+      ...animationConfig,
       stagger: true
     }
   )
@@ -79,10 +82,8 @@ const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => 
   return (
     <div
       className={`
-        border-b border-white/[0.06]
+        ${ACCORDION_STYLES.itemWrapper}
         ${isLast ? 'border-b-0' : ''}
-        transition-all duration-300
-        group
         data-[state=open]:bg-gradient-to-r
         data-[state=open]:from-transparent
         data-[state=open]:to-blue-500/5
@@ -96,62 +97,32 @@ const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => 
         type="button"
         role="button"
         aria-expanded={open}
-        aria-controls={`panel-${item.id}`}
-        aria-describedby={item.subtitle ? `subtitle-${item.id}` : undefined}
-        id={`header-${item.id}`}
+        aria-controls={getElementId('panel', item.id)}
+        aria-describedby={item.subtitle ? getElementId('subtitle', item.id) : undefined}
+        id={getElementId('header', item.id)}
         data-accordion-trigger={index}
         tabIndex={0}
         className={`
-          relative
-          w-full
-          px-8 py-6
-          text-left
-          bg-transparent
-          transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1)
-          overflow-hidden
-          
-          before:content-['']
-          before:absolute
-          before:inset-0
-          before:bg-gradient-to-r
-          before:from-transparent
-          before:via-blue-500/10
-          before:to-transparent
-          before:opacity-0
-          before:transition-opacity
-          before:duration-300
-          
-          after:content-['']
-          after:absolute
-          after:inset-0
-          after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(59,130,246,0.15),transparent_40%)]
-          after:opacity-0
-          after:transition-opacity
-          after:duration-300
-          
-          hover:bg-[#1A1A1A]/60
+          ${ACCORDION_STYLES.button.base}
+          ${GRADIENT_STYLES.beforeGradient}
+          ${GRADIENT_STYLES.afterMouseGradient}
+          ${ACCORDION_STYLES.button.hover}
           hover:before:opacity-100
           hover:after:opacity-100
-          
-          focus-visible:outline-none
-          focus-visible:ring-2
-          focus-visible:ring-blue-500
-          focus-visible:ring-offset-2
-          focus-visible:ring-offset-black
-          
-          ${open ? 'bg-[#222222]/50 before:opacity-50' : ''}
-          ${item.disabled ? 'opacity-50 cursor-not-allowed hover:bg-transparent' : 'cursor-pointer'}
+          ${ACCORDION_STYLES.button.focus}
+          ${open ? `${ACCORDION_STYLES.button.active} before:opacity-50` : ''}
+          ${item.disabled ? ACCORDION_STYLES.button.disabled : 'cursor-pointer'}
         `}
       >
         <div className="relative z-10 flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium text-white transition-colors duration-300 group-hover:text-blue-100">
+            <h3 className={ACCORDION_STYLES.text.title}>
               {item.title}
             </h3>
             {item.subtitle && (
               <p 
-                id={`subtitle-${item.id}`}
-                className="mt-1 text-sm text-gray-400 transition-colors duration-300 group-hover:text-gray-300"
+                id={getElementId('subtitle', item.id)}
+                className={ACCORDION_STYLES.text.subtitle}
               >
                 {item.subtitle}
               </p>
@@ -160,9 +131,9 @@ const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => 
           <div
             ref={iconRef}
             className={`
-              transition-all duration-300 ease-out
-              ${open ? 'text-blue-400' : 'text-gray-400'}
-              group-hover:text-blue-300
+              ${ACCORDION_STYLES.icon.wrapper}
+              ${open ? ACCORDION_STYLES.icon.open : ACCORDION_STYLES.icon.closed}
+              ${ACCORDION_STYLES.icon.hover}
             `}
             aria-hidden="true"
           >
@@ -190,13 +161,12 @@ const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => 
 
       <div
         ref={contentRef}
-        id={`panel-${item.id}`}
+        id={getElementId('panel', item.id)}
         role="region"
-        aria-labelledby={`header-${item.id}`}
+        aria-labelledby={getElementId('header', item.id)}
         aria-hidden={!open}
-        className="
-          overflow-hidden
-          relative
+        className={`
+          ${ACCORDION_STYLES.content.wrapper}
           before:content-['']
           before:absolute
           before:inset-x-8
@@ -206,17 +176,12 @@ const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => 
           before:from-transparent
           before:via-blue-500/20
           before:to-transparent
-        "
+        `}
         style={{
           height: 0,
         }}
       >
-        <div className="
-          accordion-content-inner 
-          px-8 pb-6 pt-4 
-          text-gray-300
-          relative
-        ">
+        <div className={ACCORDION_STYLES.content.inner}>
           {item.content}
         </div>
       </div>

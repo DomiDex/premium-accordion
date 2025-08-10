@@ -21,14 +21,17 @@ export const ACCORDION_STYLES = {
     'border border-white/[0.08]',
     'rounded-2xl',
     'overflow-hidden',
-    'shadow-2xl shadow-black/50'
+    'shadow-2xl shadow-black/50',
+    'isolate' // Prevents rendering issues with pseudo-elements
   ),
 
   // Item wrapper
   itemWrapper: cn(
     'border-b border-white/[0.06]',
     'transition-all duration-300',
-    'group'
+    'group',
+    'relative',
+    'z-0' // Ensure proper stacking context
   ),
 
   // Button base styles
@@ -40,7 +43,10 @@ export const ACCORDION_STYLES = {
       'text-left',
       'bg-transparent',
       'transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1)',
-      'overflow-hidden'
+      'overflow-hidden',
+      'transform-gpu', // Force GPU acceleration
+      'backface-hidden', // Prevent flickering
+      'isolate' // Create new stacking context
     ),
     hover: 'hover:bg-[#1A1A1A]/60',
     active: 'bg-[#222222]/50',
@@ -95,7 +101,9 @@ export const GRADIENT_STYLES = {
     'before:to-transparent',
     'before:opacity-0',
     'before:transition-opacity',
-    'before:duration-300'
+    'before:duration-300',
+    'before:will-change-[opacity]', // Optimize for opacity changes
+    'before:z-0' // Ensure proper stacking
   ),
   afterMouseGradient: cn(
     "after:content-['']",
@@ -104,7 +112,9 @@ export const GRADIENT_STYLES = {
     'after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(59,130,246,0.15),transparent_40%)]',
     'after:opacity-0',
     'after:transition-opacity',
-    'after:duration-300'
+    'after:duration-300',
+    'after:will-change-[opacity]', // Optimize for opacity changes
+    'after:z-0' // Ensure proper stacking
   ),
 } as const
 

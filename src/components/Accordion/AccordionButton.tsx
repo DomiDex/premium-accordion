@@ -1,12 +1,12 @@
 'use client'
 
 import { forwardRef, RefObject } from 'react'
-import { ACCORDION_STYLES, getButtonClasses, getIconClasses, cn } from './utils/styles'
+import { ACCORDION_STYLES, getButtonClasses, getIconClasses } from './utils/styles'
 import { getElementId } from './utils/dom'
-import type { AccordionItem } from './Accordion'
+import type { AccordionItemData } from './types/accordion.types'
 
 interface AccordionButtonProps {
-  item: AccordionItem
+  item: AccordionItemData
   index: number
   isOpen: boolean
   onClick: () => void
@@ -30,7 +30,7 @@ export const AccordionButton = forwardRef<HTMLButtonElement, AccordionButtonProp
         tabIndex={0}
         className={getButtonClasses(isOpen, item.disabled)}
       >
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-20 flex items-center justify-between">
           <div>
             <h3 className={ACCORDION_STYLES.text.title}>
               {item.title}

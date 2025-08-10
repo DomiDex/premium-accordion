@@ -1,13 +1,5 @@
-import { RefObject, useEffect, useCallback } from 'react'
-
-interface UseKeyboardNavigationProps {
-  buttonRef: RefObject<HTMLButtonElement | null>
-  index: number
-  totalItems: number
-  togglePanel: (index: number) => void
-  isOpen: boolean
-  disabled?: boolean
-}
+import { useEffect, useCallback } from 'react'
+import type { UseKeyboardNavigationProps } from '../types/accordion.types'
 
 export const useKeyboardNavigation = ({
   buttonRef,
@@ -121,11 +113,4 @@ export const useKeyboardNavigation = ({
     focusFirst,
     focusLast
   ])
-
-  return {
-    focusNext,
-    focusPrevious,
-    focusFirst,
-    focusLast
-  }
 }

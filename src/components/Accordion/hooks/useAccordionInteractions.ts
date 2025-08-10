@@ -1,14 +1,21 @@
 import { useEffect, useRef, RefObject, useCallback } from 'react'
-
-interface UseAccordionInteractionsOptions {
-  isOpen?: boolean
-  disabled?: boolean
-}
+import type { UseAccordionInteractionsOptions } from '../types/accordion.types'
 
 export const useAccordionInteractions = (
   buttonRef: RefObject<HTMLButtonElement | null>,
   options: UseAccordionInteractionsOptions = {}
-) => {
+): {
+  handlers: {
+    onMouseMove: (e: MouseEvent) => void
+    onMouseLeave: () => void
+    onFocus: () => void
+    onBlur: () => void
+    onTouchStart: () => void
+    onTouchEnd: () => void
+  }
+  isOpen: boolean
+  disabled: boolean
+} => {
   const rafRef = useRef<number | undefined>(undefined)
   const { isOpen = false, disabled = false } = options
 

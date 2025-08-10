@@ -6,28 +6,20 @@ import { useAccordionAnimation } from './hooks/useAccordionAnimation'
 import { useAccordionInteractions } from './hooks/useAccordionInteractions'
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation'
 import { useAriaLive } from './hooks/useAriaLive'
-import { useResizeObserver } from './hooks/useResizeObserver'
+// Removed useResizeObserver - not needed, GSAP handles height animations
 import { AccordionButton } from './AccordionButton'
 import { AccordionContent } from './AccordionContent'
 import { getItemWrapperClasses } from './utils/styles'
-import type { AccordionItem as AccordionItemType } from './Accordion'
+import type { AccordionItemData } from './types/accordion.types'
 
 interface AccordionItemProps {
-  item: AccordionItemType
+  item: AccordionItemData
   index: number
   isLast: boolean
 }
 
 const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => {
   const { togglePanel, isOpen, animationDuration, easingFunction, totalItems } = useAccordion()
-  
-  // Consolidated refs management
-  const refs = useRef({
-    content: null as HTMLDivElement | null,
-    button: null as HTMLButtonElement | null,
-    icon: null as HTMLDivElement | null
-  })
-  
   const open = isOpen(index)
   const { announce } = useAriaLive()
 
@@ -73,14 +65,6 @@ const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => 
     togglePanel,
     isOpen: open,
     disabled: item.disabled
-  })
-  
-  // Handle dynamic content resizing
-  useResizeObserver(contentRef, {
-    isOpen: open,
-    onResize: () => {
-      // Content resized, animation will be handled by the hook
-    }
   })
 
   const handleClick = useCallback(() => {

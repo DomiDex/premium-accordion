@@ -2,13 +2,7 @@ import { useRef, RefObject, useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import { setMultipleWillChange, clearMultipleWillChange } from '../utils/dom'
 import { ANIMATION_CONFIG } from '../utils/animation'
-
-interface UseAccordionAnimationOptions {
-  duration?: number
-  ease?: string
-  stagger?: boolean
-  enableMicroInteractions?: boolean
-}
+import type { UseAccordionAnimationOptions } from '../types/accordion.types'
 
 export const useAccordionAnimation = (
   contentRef: RefObject<HTMLDivElement | null>,
@@ -16,7 +10,7 @@ export const useAccordionAnimation = (
   buttonRef: RefObject<HTMLButtonElement | null>,
   isOpen: boolean,
   options: UseAccordionAnimationOptions = {}
-) => {
+): { timeline: gsap.core.Timeline | null; isAnimating: boolean } => {
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
   const previousOpenState = useRef<boolean | null>(null)
   const isFirstRender = useRef(true)
@@ -80,7 +74,10 @@ export const useAccordionAnimation = (
       const tl = gsap.timeline({
         defaults: { ease },
         onStart: () => {
-          gsap.set(content, { overflow: 'hidden' })
+          gsap.set(content, { 
+            overflow: 'hidden',
+            transform: 'translateZ(0)' // Force GPU acceleration to prevent flicker
+          })
           setMultipleWillChange(
             { content, inner },
             { content: 'height', inner: 'opacity, transform' }
@@ -166,19 +163,7 @@ export const useAccordionAnimation = (
         }
       }
 
-      // Add subtle glow pulse on open
-      if (enableMicroInteractions && button) {
-        tl.to(button, {
-          boxShadow: '0 0 20px rgba(59, 130, 246, 0.2)',
-          duration: 0.3,
-          ease: 'power2.out'
-        }, '-=0.3')
-        .to(button, {
-          boxShadow: '0 0 0 rgba(59, 130, 246, 0)',
-          duration: 0.4,
-          ease: 'power2.out'
-        })
-      }
+      // Removed box-shadow animation to prevent flicker
 
       timelineRef.current = tl
     } else {
@@ -186,7 +171,10 @@ export const useAccordionAnimation = (
       const tl = gsap.timeline({
         defaults: { ease: 'power2.in' },
         onStart: () => {
-          gsap.set(content, { overflow: 'hidden' })
+          gsap.set(content, { 
+            overflow: 'hidden',
+            transform: 'translateZ(0)' // Force GPU acceleration to prevent flicker
+          })
           setMultipleWillChange(
             { content, inner },
             { content: 'height', inner: 'opacity, transform' }

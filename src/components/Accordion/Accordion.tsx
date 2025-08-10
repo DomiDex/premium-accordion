@@ -4,34 +4,10 @@ import { forwardRef } from 'react'
 import { AccordionProvider } from './AccordionContext'
 import { AccordionItem } from './AccordionItem'
 import { ACCORDION_STYLES, cn } from './utils/styles'
+import type { AccordionProps, AccordionRef } from './types/accordion.types'
 
-export interface AccordionItem {
-  id: string
-  title: string
-  subtitle?: string
-  content: React.ReactNode
-  icon?: React.ReactNode
-  disabled?: boolean
-}
-
-export interface AccordionProps {
-  items: AccordionItem[]
-  mode?: 'single' | 'multiple'
-  defaultOpen?: number | number[]
-  animationDuration?: number
-  easingFunction?: string
-  className?: string
-  onToggle?: (index: number, isOpen: boolean) => void
-}
-
-export interface AccordionRef {
-  open: (index: number) => void
-  close: (index: number) => void
-  toggle: (index: number) => void
-  openAll: () => void
-  closeAll: () => void
-  refresh: () => void
-}
+// Re-export types for backward compatibility
+export type { AccordionItemData as AccordionItem, AccordionProps, AccordionRef } from './types/accordion.types'
 
 export const Accordion = forwardRef<AccordionRef, AccordionProps>(
   ({ items, mode = 'single', className = '', ...props }, ref) => {
@@ -47,12 +23,14 @@ export const Accordion = forwardRef<AccordionRef, AccordionProps>(
             'before:from-white/[0.05]',
             'before:to-transparent',
             'before:pointer-events-none',
+            'before:z-10', // Add z-index to prevent flicker
             "after:content-['']",
             'after:absolute',
             'after:inset-0',
             'after:rounded-2xl',
             'after:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]',
             'after:pointer-events-none',
+            'after:z-10', // Add z-index to prevent flicker
             className
           )}
         >

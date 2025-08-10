@@ -3,10 +3,10 @@
 import { forwardRef } from 'react'
 import { ACCORDION_STYLES, getContentClasses } from './utils/styles'
 import { getElementId } from './utils/dom'
-import type { AccordionItem } from './Accordion'
+import type { AccordionItemData } from './types/accordion.types'
 
 interface AccordionContentProps {
-  item: AccordionItem
+  item: AccordionItemData
   isOpen: boolean
 }
 

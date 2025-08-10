@@ -1,5 +1,5 @@
 import { useRef, RefObject, useLayoutEffect } from 'react'
-import gsap from 'gsap'
+import { timeline, set, to } from '../utils/gsap'
 import { setMultipleWillChange, clearMultipleWillChange } from '../utils/dom'
 import { ANIMATION_CONFIG } from '../utils/animation'
 import type { UseAccordionAnimationOptions } from '../types/accordion.types'
@@ -10,11 +10,11 @@ export const useAccordionAnimation = (
   buttonRef: RefObject<HTMLButtonElement | null>,
   isOpen: boolean,
   options: UseAccordionAnimationOptions = {}
-): { timeline: gsap.core.Timeline | null; isAnimating: boolean } => {
-  const timelineRef = useRef<gsap.core.Timeline | null>(null)
+): { timeline: ReturnType<typeof timeline> | null; isAnimating: boolean } => {
+  const timelineRef = useRef<ReturnType<typeof timeline> | null>(null)
   const previousOpenState = useRef<boolean | null>(null)
   const isFirstRender = useRef(true)
-  const breathingAnimation = useRef<gsap.core.Tween | null>(null)
+  const breathingAnimation = useRef<ReturnType<typeof to> | null>(null)
 
   const {
     duration = ANIMATION_CONFIG.DEFAULT_DURATION,
@@ -36,15 +36,15 @@ export const useAccordionAnimation = (
         const inner = content.querySelector('.accordion-content-inner') as HTMLElement
         const icon = iconRef.current
         
-        gsap.set(content, { height: 'auto', overflow: 'visible' })
-        gsap.set(inner, { opacity: 1, y: 0 })
-        gsap.set(icon, { rotation: 180 })
+        set(content, { height: 'auto', overflow: 'visible' })
+        set(inner, { opacity: 1, y: 0 })
+        set(icon, { rotation: 180 })
         
         // Set initial state for staggered elements
         if (stagger) {
           const elements = inner?.querySelectorAll('p, li, ul, h1, h2, h3, h4, h5, h6')
           if (elements) {
-            gsap.set(elements, { opacity: 1, y: 0 })
+            set(elements, { opacity: 1, y: 0 })
           }
         }
         return
@@ -71,10 +71,10 @@ export const useAccordionAnimation = (
 
     if (isOpen) {
       // Opening animation timeline
-      const tl = gsap.timeline({
+      const tl = timeline({
         defaults: { ease },
         onStart: () => {
-          gsap.set(content, { 
+          set(content, { 
             overflow: 'hidden',
             transform: 'translateZ(0)' // Force GPU acceleration to prevent flicker
           })
@@ -84,7 +84,7 @@ export const useAccordionAnimation = (
           )
         },
         onComplete: () => {
-          gsap.set(content, { 
+          set(content, { 
             height: 'auto', 
             overflow: 'visible',
             clearProps: 'transform'
@@ -93,7 +93,7 @@ export const useAccordionAnimation = (
 
           // Start breathing animation when open
           if (enableMicroInteractions && button) {
-            breathingAnimation.current = gsap.to(button, {
+            breathingAnimation.current = to(button, {
               scale: 1.002,
               duration: 2,
               ease: 'sine.inOut',
@@ -105,9 +105,9 @@ export const useAccordionAnimation = (
       })
 
       // Calculate auto height
-      gsap.set(content, { height: 'auto' })
+      set(content, { height: 'auto' })
       const autoHeight = content.offsetHeight
-      gsap.set(content, { height: 0 })
+      set(content, { height: 0 })
 
       // Add subtle bounce effect on button
       if (enableMicroInteractions && button) {
@@ -139,7 +139,7 @@ export const useAccordionAnimation = (
 
       // Content fade in with upward movement
       if (inner) {
-        gsap.set(inner, { opacity: 0, y: 15 })
+        set(inner, { opacity: 0, y: 15 })
         tl.to(inner, {
           opacity: 1,
           y: 0,
@@ -151,7 +151,7 @@ export const useAccordionAnimation = (
         if (stagger) {
           const elements = inner.querySelectorAll('p, li, ul, h1, h2, h3, h4, h5, h6')
           if (elements.length > 0) {
-            gsap.set(elements, { opacity: 0, y: 10 })
+            set(elements, { opacity: 0, y: 10 })
             tl.to(elements, {
               opacity: 1,
               y: 0,
@@ -168,10 +168,10 @@ export const useAccordionAnimation = (
       timelineRef.current = tl
     } else {
       // Closing animation timeline
-      const tl = gsap.timeline({
+      const tl = timeline({
         defaults: { ease: 'power2.in' },
         onStart: () => {
-          gsap.set(content, { 
+          set(content, { 
             overflow: 'hidden',
             transform: 'translateZ(0)' // Force GPU acceleration to prevent flicker
           })
@@ -185,7 +185,7 @@ export const useAccordionAnimation = (
             breathingAnimation.current.kill()
             breathingAnimation.current = null
             if (button) {
-              gsap.set(button, { scale: 1 })
+              set(button, { scale: 1 })
             }
           }
         },
@@ -267,7 +267,7 @@ export const useAccordionAnimation = (
     
     const handleMouseEnter = () => {
       if (!breathingAnimation.current) {
-        gsap.to(button, {
+        to(button, {
           scale: 1.005,
           duration: 0.2,
           ease: ANIMATION_CONFIG.DEFAULT_EASE
@@ -277,7 +277,7 @@ export const useAccordionAnimation = (
 
     const handleMouseLeave = () => {
       if (!breathingAnimation.current) {
-        gsap.to(button, {
+        to(button, {
           scale: 1,
           duration: 0.2,
           ease: ANIMATION_CONFIG.DEFAULT_EASE

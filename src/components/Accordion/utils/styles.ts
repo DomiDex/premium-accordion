@@ -81,14 +81,6 @@ export const ACCORDION_STYLES = {
   },
 } as const
 
-// Common transition classes
-export const TRANSITIONS = {
-  fast: 'transition-all duration-200',
-  normal: 'transition-all duration-300',
-  slow: 'transition-all duration-500',
-  smooth: 'transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1)',
-} as const
-
 // Pseudo-element styles for gradients
 export const GRADIENT_STYLES = {
   beforeGradient: cn(

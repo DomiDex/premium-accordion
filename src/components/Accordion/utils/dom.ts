@@ -1,4 +1,4 @@
-import gsap from 'gsap'
+import { set } from './gsap'
 
 /**
  * DOM manipulation utilities
@@ -18,7 +18,7 @@ export const setWillChange = (
   properties: string
 ): void => {
   if (!element) return
-  gsap.set(element, { willChange: properties })
+  set(element, { willChange: properties })
 }
 
 /**
@@ -26,7 +26,7 @@ export const setWillChange = (
  */
 export const clearWillChange = (element: HTMLElement | null): void => {
   if (!element) return
-  gsap.set(element, { clearProps: 'will-change' })
+  set(element, { clearProps: 'will-change' })
 }
 
 /**

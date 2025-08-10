@@ -169,19 +169,3 @@ export const isAccordionItemData = (value: unknown): value is AccordionItemData 
   )
 }
 
-/**
- * Utility types
- */
-export type DeepReadonly<T> = {
-  readonly [P in keyof T]: T[P] extends object 
-    ? DeepReadonly<T[P]> 
-    : T[P]
-}
-
-export type RequiredKeys<T> = {
-  [K in keyof T]-?: {} extends Pick<T, K> ? never : K
-}[keyof T]
-
-export type OptionalKeys<T> = {
-  [K in keyof T]-?: {} extends Pick<T, K> ? K : never
-}[keyof T]

@@ -99,7 +99,10 @@ const AccordionItemComponent = ({ item, index, isLast }: AccordionItemProps) => 
 export const AccordionItem = memo(AccordionItemComponent, (prevProps, nextProps) => {
   return (
     prevProps.item.id === nextProps.item.id &&
+    prevProps.item.title === nextProps.item.title &&
+    prevProps.item.subtitle === nextProps.item.subtitle &&
     prevProps.item.disabled === nextProps.item.disabled &&
+    prevProps.item.content === nextProps.item.content &&
     prevProps.index === nextProps.index &&
     prevProps.isLast === nextProps.isLast
   )

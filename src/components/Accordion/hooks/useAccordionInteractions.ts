@@ -1,4 +1,5 @@
-import { useEffect, useRef, RefObject, useCallback } from 'react'
+import { useEffect, RefObject, useCallback, useMemo } from 'react'
+import { rafThrottle } from '../utils/performance'
 import type { UseAccordionInteractionsOptions } from '../types/accordion.types'
 
 export const useAccordionInteractions = (
@@ -16,39 +17,32 @@ export const useAccordionInteractions = (
   isOpen: boolean
   disabled: boolean
 } => {
-  const rafRef = useRef<number | undefined>(undefined)
   const { isOpen = false, disabled = false } = options
 
-  // Mouse gradient effect
-  const handleMouseMove = useCallback((e: MouseEvent) => {
+  // Mouse gradient effect - throttled with RAF for performance
+  const handleMouseMoveRaw = useCallback((e: MouseEvent) => {
     if (disabled) return
     
     const element = buttonRef.current
     if (!element) return
-
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current)
-    }
-
-    rafRef.current = requestAnimationFrame(() => {
-      if (!element) return
-      
-      const rect = element.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-      
-      element.style.setProperty('--mouse-x', `${x}px`)
-      element.style.setProperty('--mouse-y', `${y}px`)
-    })
+    
+    const rect = element.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    
+    element.style.setProperty('--mouse-x', `${x}px`)
+    element.style.setProperty('--mouse-y', `${y}px`)
   }, [disabled, buttonRef])
+  
+  // Throttle mouse move with RAF for 60fps
+  const handleMouseMove = useMemo(
+    () => rafThrottle(handleMouseMoveRaw),
+    [handleMouseMoveRaw]
+  )
 
   const handleMouseLeave = useCallback(() => {
     const element = buttonRef.current
     if (!element) return
-
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current)
-    }
     
     element.style.setProperty('--mouse-x', '50%')
     element.style.setProperty('--mouse-y', '50%')
@@ -106,10 +100,6 @@ export const useAccordionInteractions = (
     element.style.setProperty('--mouse-y', '50%')
 
     return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current)
-      }
-      
       element.removeEventListener('mousemove', handleMouseMove)
       element.removeEventListener('mouseleave', handleMouseLeave)
       element.removeEventListener('focus', handleFocus)

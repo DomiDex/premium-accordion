@@ -88,6 +88,8 @@ export default function Home() {
           items={accordionItems}
           mode="single"
           defaultOpen={0}
+          animationDuration={500}
+          easingFunction="power2.inOut"
         />
       </div>
     </main>

@@ -13,6 +13,7 @@ interface AccordionContextValue {
   scrollBehavior?: boolean
   scrollOffset?: number
   onToggle?: (index: number, isOpen: boolean) => void
+  totalItems: number
 }
 
 const AccordionContext = createContext<AccordionContextValue | null>(null)
@@ -34,6 +35,7 @@ interface AccordionProviderProps {
   scrollBehavior?: boolean
   scrollOffset?: number
   onToggle?: (index: number, isOpen: boolean) => void
+  totalItems: number
 }
 
 export const AccordionProvider = forwardRef<AccordionRef, AccordionProviderProps>(
@@ -47,6 +49,7 @@ export const AccordionProvider = forwardRef<AccordionRef, AccordionProviderProps
       scrollBehavior = true,
       scrollOffset = 100,
       onToggle,
+      totalItems,
     },
     ref
   ) => {
@@ -59,25 +62,29 @@ export const AccordionProvider = forwardRef<AccordionRef, AccordionProviderProps
     const isOpen = useCallback((index: number) => openPanels.includes(index), [openPanels])
 
     const togglePanel = useCallback(
-      (index: number) => {
-        setOpenPanels((prev) => {
-          let newPanels: number[]
-          const isCurrentlyOpen = prev.includes(index)
+    (index: number) => {
+      setOpenPanels((prev) => {
+        let newPanels: number[]
+        const isCurrentlyOpen = prev.includes(index)
 
-          if (mode === 'single') {
-            newPanels = isCurrentlyOpen ? [] : [index]
-          } else {
-            newPanels = isCurrentlyOpen
-              ? prev.filter((i) => i !== index)
-              : [...prev, index]
-          }
+        if (mode === 'single') {
+          newPanels = isCurrentlyOpen ? [] : [index]
+        } else {
+          newPanels = isCurrentlyOpen
+            ? prev.filter((i) => i !== index)
+            : [...prev, index]
+        }
 
+        // Use requestAnimationFrame for smooth state updates
+        requestAnimationFrame(() => {
           onToggle?.(index, !isCurrentlyOpen)
-          return newPanels
         })
-      },
-      [mode, onToggle]
-    )
+        
+        return newPanels
+      })
+    },
+    [mode, onToggle]
+  )
 
     const open = useCallback((index: number) => {
       setOpenPanels((prev) => {
@@ -127,6 +134,7 @@ export const AccordionProvider = forwardRef<AccordionRef, AccordionProviderProps
           scrollBehavior,
           scrollOffset,
           onToggle,
+          totalItems,
         }}
       >
         {children}
